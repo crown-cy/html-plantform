@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>运营数据总览 · 响应式数据看板</title>
+  <meta name="description" content="HTML + CSS + 原生 JS 实现的三断点响应式数据看板，支持深/浅色主题、无第三方依赖。" />
+  <link rel="stylesheet" href="./assets/styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主内容</a>
+
+  <div class="app">
+    <!-- ============ 侧栏：仅 ≥1200px 渲染 ============ -->
+    <aside class="sidebar" aria-label="侧边栏">
+      <div class="brand">
+        <span class="brand__mark" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+          </svg>
+        </span>
+        <span class="brand__text">
+          <strong>Northwind</strong>
+          <small>Data Console</small>
+        </span>
+      </div>
+
+      <nav class="nav" aria-label="主导航">
+        <ul class="nav__list">
+          <li>
+            <a class="nav__item is-active" href="#main" aria-current="page">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="8" rx="1.6"/><rect x="14" y="3" width="7" height="5" rx="1.6"/><rect x="14" y="12" width="7" height="9" rx="1.6"/><rect x="3" y="15" width="7" height="6" rx="1.6"/></svg>
+              概览
+            </a>
+          </li>
+          <li>
+            <a class="nav__item" href="#main">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l5-6 4 3 5-7 4 4"/></svg>
+              趋势分析
+            </a>
+          </li>
+          <li>
+            <a class="nav__item" href="#main">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg>
+              用户
+            </a>
+          </li>
+          <li>
+            <a class="nav__item" href="#main">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="12" cy="18" r="2.4"/><path d="M8.4 7.4h7.2M6.9 8.2l3.6 7.4M17.1 8.2l-3.6 7.4"/></svg>
+              渠道
+            </a>
+          </li>
+          <li>
+            <a class="nav__item" href="#main">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3.05V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9v.09a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1Z"/></svg>
+              设置
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar__goal">
+        <p class="sidebar__goal-title">本月营收目标</p>
+        <p class="sidebar__goal-num num">82<span>%</span></p>
+        <div class="progress" role="progressbar" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100" aria-label="本月营收目标完成度">
+          <span style="--v: 82%"></span>
+        </div>
+        <p class="sidebar__goal-note">距目标还差 ¥142,600</p>
+      </div>
+
+      <div class="sidebar__foot">
+        <span class="avatar" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg>
+        </span>
+        <span class="sidebar__user">
+          <strong>陈 一</strong>
+          <small>数据分析师</small>
+        </span>
+      </div>
+    </aside>
+
+    <!-- ============ 主内容区 ============ -->
+    <div class="content">
+      <header class="topbar">
+        <div class="topbar__title">
+          <p class="eyebrow">Overview</p>
+          <h1>运营数据总览</h1>
+          <p class="subtitle">
+            数据更新于 <time id="updatedAt" datetime="">--:--</time> · 全部指标为演示数据
+          </p>
+        </div>
+
+        <div class="topbar__actions">
+          <button class="btn" type="button" id="refreshBtn">
+            <svg class="btn__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 12a9 9 0 1 1-2.9-6.6"/><path d="M21 3.5V9h-5.5"/>
+            </svg>
+            刷新数据
+          </button>
+          <button class="icon-btn" type="button" id="themeBtn" aria-pressed="false">
+            <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4.4"/><path d="M12 2.2v2.1M12 19.7v2.1M2.2 12h2.1M19.7 12h2.1M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/>
+            </svg>
+            <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1Z"/>
+            </svg>
+            <span class="sr-only" id="themeBtnText">切换深色模式</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- 移动 / 平板端的模块切换（≥1200 由侧栏承担） -->
+      <nav class="chips" aria-label="模块切换">
+        <button class="chip is-active" type="button" aria-pressed="true">概览</button>
+        <button class="chip" type="button" aria-pressed="false">趋势</button>
+        <button class="chip" type="button" aria-pressed="false">用户</button>
+        <button class="chip" type="button" aria-pressed="false">渠道</button>
+      </nav>
+
+      <main id="main">
+        <!-- 1. 核心指标 -->
+        <section class="section" aria-labelledby="kpiTitle">
+          <div class="section__head">
+            <h2 id="kpiTitle">核心指标</h2>
+            <p class="section__hint">近 24 小时 · 环比上一周期</p>
+          </div>
+          <div class="kpi-grid" id="kpiGrid"><!-- JS 渲染 --></div>
+        </section>
+
+        <!-- 2. 趋势 + 渠道占比 -->
+        <div class="panels">
+          <section class="card" aria-labelledby="trendTitle">
+            <div class="card__head">
+              <h2 id="trendTitle">活跃趋势</h2>
+              <span class="tag">近 7 日 · 人</span>
+            </div>
+            <div class="chart" id="trendChart" role="img" aria-label="近 7 日活跃用户柱状图"><!-- JS 渲染 --></div>
+          </section>
+
+          <section class="card" aria-labelledby="shareTitle">
+            <div class="card__head">
+              <h2 id="shareTitle">渠道占比</h2>
+              <span class="tag">按访问量</span>
+            </div>
+            <div class="share">
+              <div class="donut" id="donut" role="img" aria-label="各渠道访问量占比环形图">
+                <div class="donut__hole">
+                  <strong class="num" id="donutTotal">0</strong>
+                  <span>总访问</span>
+                </div>
+              </div>
+              <ul class="legend" id="legend"><!-- JS 渲染 --></ul>
+            </div>
+          </section>
+        </div>
+
+        <!-- 3. 渠道明细：6 条数据全部由 JS 数组渲染 -->
+        <section class="section" aria-labelledby="channelTitle">
+          <div class="section__head">
+            <h2 id="channelTitle">渠道明细</h2>
+            <p class="section__hint" id="channelCount">共 6 个渠道</p>
+          </div>
+          <div class="card card--flush">
+            <ul class="channels" id="channelList"><!-- JS 渲染 --></ul>
+          </div>
+        </section>
+      </main>
+
+      <footer class="foot">
+        <p>HTML + CSS + 原生 JS · 无任何第三方依赖 · 断点 &lt;768 / 768–1199 / ≥1200</p>
+      </footer>
+    </div>
+  </div>
+
+  <script src="./assets/app.js" defer></script>
+</body>
+</html>

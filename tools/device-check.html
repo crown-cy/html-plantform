@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>设备适配自检 · Device Check</title>
+<style>
+  :root {
+    --bg: #0b1220;
+    --panel: #131c30;
+    --line: #24324f;
+    --text: #e8eefc;
+    --muted: #93a1bb;
+    --ok: #35d399;
+    --bad: #ff6b70;
+    --brand: #5b8cff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: clamp(14px, 2.5vw, 28px);
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.6 system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  h1 { font-size: clamp(19px, 4vw, 24px); margin: 0 0 4px; letter-spacing: -.02em; }
+  h2 { font-size: 14px; margin: 0 0 10px; color: var(--text); }
+  .sub { color: var(--muted); font-size: 12.5px; margin: 0 0 18px; }
+  section { margin-bottom: 22px; }
+  .grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+    min-width: 0;
+  }
+  .card span { display: block; font-size: 11.5px; color: var(--muted); }
+  .card b {
+    display: block;
+    font-size: 20px;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.02em;
+    margin-top: 2px;
+    word-break: break-word;
+  }
+  .pass { color: var(--ok); }
+  .fail { color: var(--bad); }
+
+  button {
+    font: inherit;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 9px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--text);
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--brand); color: var(--brand); }
+  button:disabled { opacity: .5; cursor: default; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12.5px; }
+  th, td { padding: 8px 8px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { color: var(--muted); font-weight: 600; font-size: 11.5px; }
+  td.num { font-variant-numeric: tabular-nums; }
+  .wrap-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  .touch {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  .tap {
+    width: 92px; height: 92px;
+    border-radius: 14px;
+    border: 1px dashed var(--line);
+    background: var(--panel);
+    display: grid; place-items: center;
+    font-size: 12px; color: var(--muted);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tap:active { background: #1b2a47; border-color: var(--brand); color: var(--brand); }
+  .strip {
+    display: flex; gap: 8px;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .strip i {
+    flex: 0 0 120px; height: 56px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #22304d, #1a2740);
+    border: 1px solid var(--line);
+    display: grid; place-items: center;
+    font-style: normal; font-size: 11px; color: var(--muted);
+  }
+  .note { font-size: 12px; color: var(--muted); margin-top: 10px; }
+  code { background: #16223a; padding: 1px 5px; border-radius: 5px; font-size: 12px; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+  <h1>设备适配自检</h1>
+  <p class="sub">当前设备实时状态 + 9 档宽度批量测量。用手机打开本页，就是最真实的检查。</p>
+
+  <!-- ============ 1. 当前设备实时状态 ============ -->
+  <section>
+    <h2>① 当前设备实时状态（手机/平板打开本页即可看）</h2>
+    <div class="grid">
+      <div class="card"><span>视口（CSS px）</span><b id="vp">-</b></div>
+      <div class="card"><span>设备像素比 DPR</span><b id="dpr">-</b></div>
+      <div class="card"><span>命中断点档位</span><b id="bp">-</b></div>
+      <div class="card"><span>横向滚动条</span><b id="ovf">-</b></div>
+    </div>
+    <p class="note">
+      滚动、横竖屏切换、缩放窗口，上面的数字会实时刷新。判断标准只有一条：<b>横向滚动条必须是「无」</b>。
+    </p>
+  </section>
+
+  <!-- ============ 2. 批量测量 ============ -->
+  <section>
+    <h2>② 批量测量 9 档宽度（对照作业三档规则）</h2>
+    <button id="run" type="button">开始测量</button>
+    <span class="note" id="runNote"></span>
+    <div class="wrap-x">
+      <table>
+        <thead>
+          <tr>
+            <th>视口</th><th>档位</th><th>指标卡每行</th><th>侧栏</th>
+            <th>scrollWidth / clientWidth</th><th>结论</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td colspan="6" style="color:#93a1bb">尚未测量</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note" id="hint"></p>
+  </section>
+
+  <!-- ============ 3. 触控与滚动 ============ -->
+  <section>
+    <h2>③ 触控 / 横向滚动容器</h2>
+    <div class="touch">
+      <div class="tap" id="tap">按住看反馈</div>
+      <div class="strip" id="strip">
+        <i>横向滑动 1</i><i>横向滑动 2</i><i>横向滑动 3</i><i>横向滑动 4</i><i>横向滑动 5</i>
+      </div>
+    </div>
+    <p class="note">
+      手指按住左侧方块应有高亮；上面的卡片条只能「内部」横向滑动，<b>不能带动整页左右晃</b>。
+    </p>
+  </section>
+
+  <script>
+    /* ---------- 1. 当前设备状态 ---------- */
+    const $ = (s) => document.querySelector(s);
+    const de = document.documentElement;
+
+    function breakpointOf(w) {
+      if (w < 768) return { name: '手机 · 单列', ok: true };
+      if (w < 1200) return { name: '平板 · 两列', ok: true };
+      return { name: '桌面 · 侧栏+四列', ok: true };
+    }
+
+    function readLive() {
+      const w = window.innerWidth;
+      const sw = de.scrollWidth;
+      const cw = de.clientWidth;
+      const over = sw - cw;
+
+      $('#vp').textContent = w + ' × ' + window.innerHeight;
+      $('#dpr').textContent = (window.devicePixelRatio || 1).toFixed(2);
+      $('#bp').textContent = breakpointOf(w).name + '（' + w + 'px）';
+
+      const ovf = $('#ovf');
+      if (over > 0) {
+        ovf.textContent = '有，溢出 ' + over + 'px';
+        ovf.className = 'fail';
+      } else {
+        ovf.textContent = '无 ✔';
+        ovf.className = 'pass';
+      }
+    }
+
+    readLive();
+    window.addEventListener('resize', readLive);
+    window.addEventListener('orientationchange', () => setTimeout(readLive, 200));
+    setTimeout(readLive, 400);
+
+    /* ---------- 2. 批量测量 ---------- */
+    const WIDTHS = [320, 360, 375, 414, 480, 600, 768, 834, 1024, 1100, 1200, 1366, 1440, 1680, 1920];
+    const rowsEl = $('#rows');
+
+    function expectCols(w) {
+      if (w < 768) return 1;
+      if (w < 1200) return 2;
+      return 4;
+    }
+
+    function measure(w) {
+      return new Promise((resolve) => {
+        const f = document.createElement('iframe');
+        f.setAttribute('width', w);
+        f.setAttribute('height', 900);
+        // 放在视口内但完全透明，避免离屏 iframe 上报 0 的尺寸
+        f.style.cssText = 'position:fixed;left:0;top:0;opacity:0;pointer-events:none;z-index:-1;' +
+          'border:0;width:' + w + 'px;height:900px';
+        f.src = '../index.html';
+
+        const timer = setTimeout(() => {
+          cleanup();
+          resolve({ w, error: '超时（可能是 file:// 跨域限制）' });
+        }, 6000);
+
+        function cleanup() {
+          clearTimeout(timer);
+          if (f.parentNode) f.parentNode.removeChild(f);
+        }
+
+        f.addEventListener('load', () => {
+          setTimeout(() => {
+            try {
+              const doc = f.contentDocument;
+              if (!doc) throw new Error('无法读取 iframe（file:// 同源限制）');
+              const d = doc.documentElement;
+              const cards = Array.from(doc.querySelectorAll('.kpi'));
+              const top = cards[0].getBoundingClientRect().top;
+              const perRow = cards.filter((c) => Math.abs(c.getBoundingClientRect().top - top) < 2).length;
+              const sb = doc.querySelector('.sidebar');
+              const hasSidebar = sb && getComputedStyle(sb).display !== 'none';
+
+              // 注意：必须先把尺寸读出来，再移除 iframe（移除后文档失效，尺寸会变 0）
+              const sw = d.scrollWidth;
+              const cw = d.clientWidth;
+              const rows = doc.querySelectorAll('.channel').length;
+
+              cleanup();
+              resolve({ w, sw, cw, perRow, hasSidebar, rows });
+            } catch (err) {
+              cleanup();
+              resolve({ w, error: err.message });
+            }
+          }, 260);
+        });
+
+        document.body.appendChild(f);
+      });
+    }
+
+    $('#run').addEventListener('click', async () => {
+      const btn = $('#run');
+      btn.disabled = true;
+      rowsEl.innerHTML = '';
+      $('#runNote').textContent = ' 测量中…';
+
+      for (const w of WIDTHS) {
+        const r = await measure(w);
+        const tr = document.createElement('tr');
+
+        if (r.error) {
+          tr.innerHTML = `<td class="num">${r.w}</td><td colspan="5" class="fail">${r.error}</td>`;
+          rowsEl.appendChild(tr);
+          continue;
+        }
+
+        const overflow = r.sw - r.cw;
+        const colsOk = r.perRow === expectCols(r.w);
+        const sideOk = (r.w >= 1200) === r.hasSidebar;
+        const pass = overflow <= 0 && colsOk && sideOk;
+
+        tr.innerHTML = `
+          <td class="num">${r.w}px</td>
+          <td>${breakpointOf(r.w).name}</td>
+          <td class="num">${r.perRow} / 期望 ${expectCols(r.w)}</td>
+          <td>${r.hasSidebar ? '有' : '无'}</td>
+          <td class="num">${r.sw} / ${r.cw}${overflow > 0 ? '（溢出 ' + overflow + '）' : ''}</td>
+          <td class="${pass ? 'pass' : 'fail'}">${pass ? 'PASS' : 'FAIL'}</td>`;
+        rowsEl.appendChild(tr);
+      }
+
+      const fails = rowsEl.querySelectorAll('.fail').length;
+      $('#runNote').textContent = fails ? ` 完成，${fails} 项异常` : ' 完成，全部通过';
+      $('#runNote').className = fails ? 'note fail' : 'note pass';
+      btn.disabled = false;
+    });
+
+    if (location.protocol === 'file:') {      $('#hint').innerHTML =
+        '⚠️ 当前用 <code>file://</code> 打开，浏览器可能拒绝读取 iframe 内部文档。' +
+        '若测量报错，请改用本地服务器：<code>python -m http.server 8080</code>，再访问 <code>http://localhost:8080/tools/device-check.html</code>。';
+    } else {
+      $('#hint').textContent = '提示：每档 iframe 都是独立的 900px 高视口，测量结果与真实浏览器一致。';
+    }
+
+    // 便于命令行自动验收：带 ?auto=1 时自动跑一轮
+    if (new URLSearchParams(location.search).has('auto')) {
+      setTimeout(() => $('#run').click(), 300);
+    }
+
+    /* ---------- 3. 触控反馈 ---------- */    $('#tap').addEventListener('pointerdown', (e) => {
+      e.currentTarget.textContent = '已按下';
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) => {
+      $('#tap').addEventListener(ev, (e) => { e.currentTarget.textContent = '按住看反馈'; });
+    });
+  </script>
+</body>
+</html>
